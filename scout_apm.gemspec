@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "addressable"
   s.add_development_dependency "activesupport"
   s.add_runtime_dependency "parser"
+  s.add_development_dependency "opentelemetry-instrumentation-redis", "0.15.0"
 
   # These are general development dependencies which are used in instrumentation
   # tests. Specific versions are pulled in using specific gemfiles, e.g. 

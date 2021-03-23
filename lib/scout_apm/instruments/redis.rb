@@ -1,3 +1,12 @@
+class Redis
+  def call
+    "I do fun stuff"
+  end
+end
+
+require 'opentelemetry-instrumentation-redis'
+OpenTelemetry::Instrumentation::Redis::Instrumentation.install
+
 module ScoutApm
   module Instruments
     class Redis
