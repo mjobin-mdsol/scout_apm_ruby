@@ -1,14 +1,24 @@
-class Redis
-  def call
-    "I do fun stuff"
-  end
-end
-
-require 'opentelemetry-instrumentation-redis'
-OpenTelemetry::Instrumentation::Redis::Instrumentation.install
+# class Redis
+#   def call
+#     "I do fun stuff"
+#   end
+# end
+#
+# require 'opentelemetry-instrumentation-redis'
+# OpenTelemetry::Instrumentation::Redis::Instrumentation.install
 
 module ScoutApm
   module Instruments
+    module RedisClientMonkey
+      def call(*args, &block)
+        command = args.first.first rescue "Unknown"
+
+        self.class.instrument("Redis", command) do
+          super(*args, &block)
+        end
+      end
+    end
+
     class Redis
       attr_reader :context
 
@@ -33,18 +43,9 @@ module ScoutApm
 
           ::Redis::Client.class_eval do
             include ScoutApm::Tracer
-
-            def call_with_scout_instruments(*args, &block)
-              command = args.first.first rescue "Unknown"
-
-              self.class.instrument("Redis", command) do
-                call_without_scout_instruments(*args, &block)
-              end
-            end
-
-            alias_method :call_without_scout_instruments, :call
-            alias_method :call, :call_with_scout_instruments
           end
+
+          ::Redis::Client.prepend(RedisClientMonkey)
         end
       end
     end
